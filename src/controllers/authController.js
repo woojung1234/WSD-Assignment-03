@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const LoginHistory = require('../models/LoginHistory');
 
 // Refresh Token 저장 (메모리 기반)
 let refreshTokens = [];
@@ -56,6 +57,16 @@ exports.login = async (req, res) => {
 
     // Refresh Token 저장
     refreshTokens.push(refreshToken);
+
+    // **로그인 이력 저장**
+    const ip = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    const device = req.headers['user-agent'] || 'Unknown Device';
+
+    await LoginHistory.create({
+      user: user._id,
+      ip,
+      device,
+    });
 
     res.status(200).json({ message: 'Login successful', accessToken, refreshToken });
   } catch (error) {

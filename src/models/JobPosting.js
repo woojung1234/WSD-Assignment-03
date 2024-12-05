@@ -12,6 +12,8 @@ const JobPostingSchema = new mongoose.Schema({
   experienceLevel: { type: String },
   deadline: { type: Date },
   requirements: { type: String },
+  approved: { type: Boolean, default: false }, // 기본값: 승인되지 않음
+
 });
 
 module.exports = mongoose.model('JobPosting', JobPostingSchema);
