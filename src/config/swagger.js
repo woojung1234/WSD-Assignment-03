@@ -27,6 +27,33 @@ const options = {
           bearerFormat: 'JWT', // 명시적으로 JWT 형식 지정
         },
       },
+      schemas: {
+        Bookmark: {
+          type: 'object',
+          properties: {
+            _id: {
+              type: 'string',
+              example: '64d9f2b2a3c9c2340e123456',
+            },
+            user: {
+              type: 'string',
+              description: 'User ID who bookmarked the job',
+              example: '64d9f2b2a3c9c2340e654321',
+            },
+            job: {
+              type: 'string',
+              description: 'ID of the job posting that is bookmarked',
+              example: '64d9f2b2a3c9c2340e789012',
+            },
+            createdAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Timestamp when the bookmark was created',
+              example: '2024-12-01T10:15:30Z',
+            },
+          },
+        },
+      },
     },
     security: [
       {

@@ -25,83 +25,87 @@ mongoose.connect(process.env.DB_URI, {
 // 딜레이 함수 (임의로 설정한 딜레이)
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// 크롤링 함수
-async function crawlSaramin(keyword, pages = 1) {
+// 통합된 크롤링 및 기술 스택 키워드
+const techStackKeywords = [
+    'python', 'java', 'javascript', 'node.js', 'react', 'vue', 'angular',
+    'django', 'flask', 'spring', 'mysql', 'mongodb', 'docker', 'typescript', 'aws'
+  ];
+  
+  // 크롤링 함수
+  async function crawlSaramin(keyword, pages = 1) {
     const jobs = [];
     const headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        'Accept-Language': 'ko-KR,ko;q=0.9',
-        'Connection': 'keep-alive',
-        'Accept-Encoding': 'gzip, deflate, br',
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+      'Accept-Language': 'ko-KR,ko;q=0.9',
+      'Connection': 'keep-alive',
+      'Accept-Encoding': 'gzip, deflate, br',
     };
-
+  
     for (let page = 1; page <= pages; page++) {
-        const url = `https://www.saramin.co.kr/zf_user/search/recruit?searchType=search&searchword=${keyword}&recruitPage=${page}`;
-        console.log(`🔍 Fetching page ${page}: ${url}`);
-
-        try {
-            const response = await axios.get(url, { headers });
-            const $ = cheerio.load(response.data);
-
-            $('.item_recruit').each((_, el) => {
-                try {
-                    const companyName = $(el).find('.corp_name a').text().trim();
-                    const jobTitle = $(el).find('.job_tit a').text().trim();
-                    const jobUrl = 'https://www.saramin.co.kr' + $(el).find('.job_tit a').attr('href');
-                    const conditions = $(el).find('.job_condition span');
-                    const location = conditions.eq(0).text().trim();
-                    const experience = conditions.eq(1).text().trim();
-                    const education = conditions.eq(2).text().trim();
-                    const employmentType = conditions.eq(3).text().trim();
-                    const jobCategory = $(el).find('.job_sector').text().trim();
-                    const salary = $(el).find('.salary_class_selector').text().trim(); // 급여
-                    const techStack = $(el).find('.tech_stack_class_selector') // 기술 스택
-                        .map((i, el) => $(el).text().trim())
-                        .get();
-                    const deadlineText = $(el).find('.job_date .date').text().trim();
-
-                    // 마감일 변환 로직
-                    let deadline = null;
-                    if (deadlineText === '오늘마감') {
-                        deadline = new Date();
-                    } else if (deadlineText === '내일마감') {
-                        const tomorrow = new Date();
-                        tomorrow.setDate(tomorrow.getDate() + 1);
-                        deadline = tomorrow;
-                    } else if (!['채용시', '상시채용'].includes(deadlineText)) {
-                        deadline = new Date(deadlineText); // 일반 날짜 변환
-                    }
-
-                    // 기본값 추가
-                    jobs.push({
-                        companyName: companyName || "Unknown Company",
-                        jobTitle: jobTitle || "Unknown Title",
-                        jobUrl: jobUrl || "No URL",
-                        location: location || "Location Not Specified",
-                        experience: experience || "Experience Not Specified",
-                        education: education || "Education Not Specified",
-                        employmentType: employmentType || "Employment Type Not Specified",
-                        jobCategory: jobCategory || "Category Not Specified",
-                        salary: salary || "Not Specified",
-                        techStack: techStack.length > 0 ? techStack : ["N/A"],
-                        deadline: deadline || null,
-                    });
-                } catch (error) {
-                    console.error(`❌ Error parsing job posting: ${error.message}`);
-                }
+      const url = `https://www.saramin.co.kr/zf_user/search/recruit?searchType=search&searchword=${keyword}&recruitPage=${page}`;
+      console.log(`🔍 Fetching page ${page}: ${url}`);
+  
+      try {
+        const response = await axios.get(url, { headers });
+        const $ = cheerio.load(response.data);
+  
+        $('.item_recruit').each((_, el) => {
+          try {
+            const companyName = $(el).find('.corp_name a').text().trim();
+            const jobTitle = $(el).find('.job_tit a').text().trim();
+            const jobUrl = 'https://www.saramin.co.kr' + $(el).find('.job_tit a').attr('href');
+            const conditions = $(el).find('.job_condition span');
+            const location = conditions.eq(0).text().trim();
+            const experience = conditions.eq(1).text().trim();
+            const education = conditions.eq(2).text().trim();
+            const employmentType = conditions.eq(3).text().trim();
+            const jobCategory = $(el).find('.job_sector').text().trim();
+            const salary = $(el).find('.salary_class_selector').text().trim();
+            const deadlineText = $(el).find('.job_date .date').text().trim();
+  
+            // 마감일 변환 로직
+            let deadline = null;
+            if (deadlineText === '오늘마감') {
+              deadline = new Date();
+            } else if (deadlineText === '내일마감') {
+              const tomorrow = new Date();
+              tomorrow.setDate(tomorrow.getDate() + 1);
+              deadline = tomorrow;
+            } else if (!['채용시', '상시채용'].includes(deadlineText)) {
+              deadline = new Date(deadlineText);
+            }
+  
+            // 키워드 기반 기술 스택 추출
+            const techStack = techStackKeywords.filter((stack) => jobTitle.toLowerCase().includes(stack) || jobCategory.toLowerCase().includes(stack));
+  
+            jobs.push({
+              companyName: companyName || 'Unknown Company',
+              jobTitle: jobTitle || 'Unknown Title',
+              jobUrl: jobUrl || 'No URL',
+              location: location || 'Location Not Specified',
+              experience: experience || 'Experience Not Specified',
+              education: education || 'Education Not Specified',
+              employmentType: employmentType || 'Employment Type Not Specified',
+              jobCategory: jobCategory || 'Category Not Specified',
+              salary: salary || 'Not Specified',
+              techStack: techStack.length > 0 ? techStack : ['N/A'],
+              deadline: deadline || null,
             });
-
-            console.log(`✅ ${page} 페이지 크롤링 완료`);
-        } catch (error) {
-            console.error(`❌ Error fetching page ${page}: ${error.message}`);
-        }
-
-        // 페이지 간 딜레이를 추가하여 서버 부하를 줄임
-        await delay(2000); // 2초 간격으로 요청을 보내도록 설정
+          } catch (error) {
+            console.error(`❌ Error parsing job posting: ${error.message}`);
+          }
+        });
+  
+        console.log(`✅ ${page} 페이지 크롤링 완료`);
+      } catch (error) {
+        console.error(`❌ Error fetching page ${page}: ${error.message}`);
+      }
+  
+      await delay(2000); // 페이지 간 요청 간격
     }
-
+  
     return jobs;
-}
+  }
 
 
 // 회사 저장
@@ -245,18 +249,21 @@ async function addBookmarkToDB(userId, jobId) {
 // 실행
 (async () => {
     try {
-        console.log('🚀 Starting crawl...');
-        const keyword = 'python';
-        const pages = 3;
+      console.log('🚀 Starting crawl...');
+      const pages = 3;
+  
+      for (const keyword of techStackKeywords) {
+        console.log(`🔍 Crawling jobs for keyword: ${keyword}`);
         const jobs = await crawlSaramin(keyword, pages);
-
-        console.log(`📄 Crawled ${jobs.length} jobs. Saving to MongoDB...`);
+  
+        console.log(`📄 Crawled ${jobs.length} jobs for keyword "${keyword}". Saving to MongoDB...`);
         await saveJobsToDB(jobs);
-
-        console.log('✅ Crawling and saving completed');
+      }
+  
+      console.log('✅ Crawling and saving completed');
     } catch (error) {
-        console.error(`❌ Error during crawling: ${error.message}`);
+      console.error(`❌ Error during crawling: ${error.message}`);
     } finally {
-        mongoose.disconnect();
+      mongoose.disconnect();
     }
-})();
+  })();
