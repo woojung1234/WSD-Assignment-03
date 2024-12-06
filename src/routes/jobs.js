@@ -1,6 +1,11 @@
 const express = require('express');
-const JobPosting = require('../models/JobPosting'); // JobPosting 모델 가져오기
 const authMiddleware = require('../middlewares/authMiddleware'); // 인증 미들웨어 가져오기
+const {
+  getJobListings,
+  getJobDetails,
+  getJobSummaryByLocation,
+  getPopularJobs,
+} = require('../controllers/jobController');
 const router = express.Router();
 /**
  * @swagger
@@ -89,56 +94,8 @@ const router = express.Router();
  *       500:
  *         description: 서버 오류
  */
-// 공고 목록 조회 (인증 필요)
-router.get('/', authMiddleware, async (req, res) => {
-  const {
-    page = 1,
-    limit = 20,
-    sort = 'createdAt',
-    region,
-    experience,
-    salary,
-    techStack,
-    keyword,
-    companyName,
-    position,
-  } = req.query;
-
-  try {
-    const filter = {};
-    if (region) filter.location = region;
-    if (experience) filter.experience = experience;
-    if (salary) filter.salary = { $gte: parseInt(salary, 10) };
-    if (techStack) filter.techStack = { $in: techStack.split(',') };
-
-    if (keyword) {
-      filter.$or = [
-        { title: { $regex: keyword, $options: 'i' } },
-        { description: { $regex: keyword, $options: 'i' } },
-      ];
-    }
-    if (companyName) filter.company = { $regex: companyName, $options: 'i' };
-    if (position) filter.title = { $regex: position, $options: 'i' };
-
-    const jobs = await JobPosting.find(filter)
-      .sort({ [sort]: 1 })
-      .skip((page - 1) * limit)
-      .limit(parseInt(limit, 10));
-
-    const total = await JobPosting.countDocuments(filter);
-
-    res.status(200).json({
-      data: jobs,
-      pagination: {
-        currentPage: parseInt(page, 10),
-        totalPages: Math.ceil(total / limit),
-        totalItems: total,
-      },
-    });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
-});
+// 공고 목록 조회
+router.get('/', authMiddleware, getJobListings);
 /**
  * @swagger
  * /jobs/{id}:
@@ -167,6 +124,7 @@ router.get('/', authMiddleware, async (req, res) => {
  *                   $ref: '#/components/schemas/JobPosting'
  *                 relatedJobs:
  *                   type: array
+ *                   description: '관련 공고 목록'
  *                   items:
  *                     $ref: '#/components/schemas/JobPosting'
  *       404:
@@ -174,31 +132,8 @@ router.get('/', authMiddleware, async (req, res) => {
  *       500:
  *         description: 서버 오류
  */
-// 공고 상세 조회 (인증 필요)
-router.get('/:id', authMiddleware, async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    const job = await JobPosting.findById(id);
-    if (!job) {
-      return res.status(404).json({ message: 'Job posting not found' });
-    }
-
-    // 조회수 증가
-    job.views += 1;
-    await job.save();
-
-    // 관련 공고 추천 (같은 기술 스택 기준)
-    const relatedJobs = await JobPosting.find({
-      techStack: { $in: job.techStack },
-      _id: { $ne: id }, // 현재 공고 제외
-    }).limit(5);
-
-    res.status(200).json({ job, relatedJobs });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
-});
+// 공고 상세 조회
+router.get('/:id', authMiddleware, getJobDetails);
 /**
  * @swagger
  * /jobs/summary/location:
@@ -233,19 +168,8 @@ router.get('/:id', authMiddleware, async (req, res) => {
  *       500:
  *         description: 서버 오류
  */
-// 지역별 공고 수 조회 (인증 필요)
-router.get('/summary/location', authMiddleware, async (req, res) => {
-  try {
-    const summary = await JobPosting.aggregate([
-      { $group: { _id: '$location', count: { $sum: 1 } } }, // 지역별 공고 수 집계
-      { $sort: { count: -1 } }, // 공고 수 기준 내림차순 정렬
-    ]);
-
-    res.status(200).json({ status: 'success', data: summary });
-  } catch (error) {
-    res.status(500).json({ status: 'error', message: 'Server error', error: error.message });
-  }
-});
+// 지역별 공고 수 조회
+router.get('/summary/location', authMiddleware, getJobSummaryByLocation);
 /**
  * @swagger
  * /jobs/popular:
@@ -295,32 +219,6 @@ router.get('/summary/location', authMiddleware, async (req, res) => {
  *       500:
  *         description: 서버 오류
  */
-// 인기 공고 조회 (인증 필요)
-router.get('/popular', authMiddleware, async (req, res) => {
-  const { page = 1, limit = 10 } = req.query;
-
-  try {
-    const skip = (page - 1) * limit;
-
-    const popularJobs = await JobPosting.find({ approved: true }) // 승인된 공고만 조회
-      .sort({ views: -1 }) // 조회수 기준 내림차순 정렬
-      .skip(skip)
-      .limit(parseInt(limit, 10));
-
-    const total = await JobPosting.countDocuments({ approved: true });
-
-    res.status(200).json({
-      status: 'success',
-      data: popularJobs,
-      pagination: {
-        currentPage: parseInt(page, 10),
-        totalPages: Math.ceil(total / limit),
-        totalItems: total,
-      },
-    });
-  } catch (error) {
-    res.status(500).json({ status: 'error', message: 'Server error', error: error.message });
-  }
-});
-
+// 인기 공고 조회
+router.get('/popular', authMiddleware, getPopularJobs);
 module.exports = router;

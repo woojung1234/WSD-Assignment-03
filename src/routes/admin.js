@@ -71,32 +71,12 @@
  */
 
 const express = require('express');
-const JobPosting = require('../models/JobPosting');
-const authMiddleware = require('../middlewares/authMiddleware'); // 인증 미들웨어 (관리자 인증 로직 추가 필요)
+const { approveJobPosting } = require('../controllers/adminController');
+const authMiddleware = require('../middlewares/authMiddleware'); // 관리자 인증 미들웨어 추가 필요
+
 const router = express.Router();
 
 // 공고 승인/비승인
-router.post('/jobs/:id/approve', authMiddleware, async (req, res) => {
-  const { id } = req.params;
-  const { approve } = req.body; // true: 승인, false: 비승인
-
-  try {
-    const job = await JobPosting.findById(id);
-    if (!job) {
-      return res.status(404).json({ message: 'Job posting not found' });
-    }
-
-    job.approved = approve; // 승인 상태 업데이트
-    await job.save();
-
-    res.status(200).json({
-      status: 'success',
-      message: `Job posting ${approve ? 'approved' : 'disapproved'} successfully`,
-      job,
-    });
-  } catch (error) {
-    res.status(500).json({ status: 'error', message: 'Server error', error: error.message });
-  }
-});
+router.post('/jobs/:id/approve', authMiddleware, approveJobPosting);
 
 module.exports = router;
