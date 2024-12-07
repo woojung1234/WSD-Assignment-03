@@ -23,12 +23,12 @@ const options = {
             _id: {
               type: 'string',
               description: '공고 ID',
-              example: '674fdc2d4ebaaef2001d7dc6',
+              example: '6752c0ee0dfbdda05c8a33ac',
             },
             title: {
               type: 'string',
               description: '공고 제목',
-              example: '마켓빌리 JAVA / DBA / TA / AA / PYTHON Recruitment',
+              example: 'Front-end 개발자 채용 (Javascript, React)',
             },
             location: {
               type: 'string',
@@ -38,12 +38,12 @@ const options = {
             salary: {
               type: 'string',
               description: '급여',
-              example: '평균연봉 상위 10%',
+              example: ' null',
             },
             url: {
               type: 'string',
               description: '공고 URL',
-              example: 'https://www.saramin.co.kr/zf_user/jobs/relay/view?view_type=search&rec_idx=49463011&location=ts&searchword=python&searchType=search&paid_fl=n&search_uuid=8f0ebf17-0f78-40c4-8646-db021bcc4bf7',
+              example: '"https://www.saramin.co.kr/zf_user/jobs/relay/view?view_type=search&rec_idx=49212705&location=ts&searchword=react&searchType=search&paid_fl=n&search_uuid=a2fcbe11-b2d6-44a1-9aa2-4e7778fed790',
             },
             techStack: {
               type: 'array',
@@ -51,7 +51,7 @@ const options = {
               items: {
                 type: 'string',
               },
-              example: ['python', 'java'],
+              example: ['javascript', 'java', 'react'],
             },
             employmentType: {
               type: 'string',

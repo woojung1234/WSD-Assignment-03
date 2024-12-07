@@ -79,10 +79,10 @@ router.post(
  *               properties:
  *                 accessToken:
  *                   type: string
- *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...(실제 토큰을 사용해야합니다.)
  *                 refreshToken:
  *                   type: string
- *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...(실제 토큰을 사용해야합니다.)
  *       400:
  *         description: "잘못된 요청 (예: 잘못된 이메일 또는 비밀번호)"
  */
@@ -136,7 +136,7 @@ router.get('/me', authMiddleware, getProfile);
  *               refreshToken: # 필드 이름 일치
  *                 type: string
  *                 description: 유효한 Refresh 토큰
- *                 example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *                 example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...(실제 토큰을 사용해야합니다.)
  *     responses:
  *       200:
  *         description: "토큰 갱신 성공"

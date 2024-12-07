@@ -40,7 +40,7 @@ const techStackKeywords = [
       'Connection': 'keep-alive',
       'Accept-Encoding': 'gzip, deflate, br',
     };
-  
+  //1 페이지씩 크롤링
     for (let page = 1; page <= pages; page++) {
       const url = `https://www.saramin.co.kr/zf_user/search/recruit?searchType=search&searchword=${keyword}&recruitPage=${page}`;
       console.log(`🔍 Fetching page ${page}: ${url}`);
