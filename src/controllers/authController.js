@@ -56,7 +56,8 @@ exports.login = async (req, res) => {
     const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
 
     // Refresh Token 저장
-    refreshTokens.push(refreshToken);
+    user.refreshToken = refreshToken;
+    await user.save();
 
     // **로그인 이력 저장**
     const ip = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress;
@@ -74,32 +75,52 @@ exports.login = async (req, res) => {
   }
 };
 
-// Access Token 갱신
-exports.refreshToken = (req, res) => {
-  const { token } = req.body;
-
-  if (!token || !refreshTokens.includes(token)) {
-    return res.status(403).json({ message: 'Refresh Token is invalid' });
-  }
+exports.refreshToken = async (req, res) => {
+  const { refreshToken } = req.body; // 필드 이름 일치
 
   try {
-    const payload = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
-    const newAccessToken = jwt.sign({ id: payload.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    if (!refreshToken) {
+      return res.status(400).json({ message: 'Refresh Token is required' });
+    }
 
-    res.status(200).json({ accessToken: newAccessToken });
+    // 사용자 확인
+    const user = await User.findOne({ refreshToken });
+    if (!user) {
+      return res.status(403).json({ message: 'Refresh Token is invalid' });
+    }
+
+    // Refresh Token 검증
+    jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET, (err, payload) => {
+      if (err) {
+        return res.status(403).json({ message: 'Invalid Refresh Token', error: err.message });
+      }
+
+      // Access Token 재발급
+      const newAccessToken = jwt.sign({ id: payload.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+      res.status(200).json({ accessToken: newAccessToken });
+    });
   } catch (error) {
-    res.status(403).json({ message: 'Invalid Refresh Token', error: error.message });
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
-// 로그아웃
-exports.logout = (req, res) => {
+exports.logout = async (req, res) => {
   const { token } = req.body;
 
-  // Refresh Token 제거
-  refreshTokens = refreshTokens.filter((t) => t !== token);
+  try {
+    const user = await User.findOne({ refreshToken: token });
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid Refresh Token' });
+    }
 
-  res.status(200).json({ message: 'Logout successful' });
+    // Refresh Token 제거
+    user.refreshToken = null;
+    await user.save();
+
+    res.status(200).json({ message: 'Logout successful' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
 };
 
 exports.updateProfile = async (req, res) => {

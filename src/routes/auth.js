@@ -126,8 +126,6 @@ router.get('/me', authMiddleware, getProfile);
  *     summary: 토큰 갱신
  *     description: Refresh 토큰을 사용하여 새로운 Access 토큰을 발급받습니다.
  *     tags: [Auth]
- *     security:
- *       - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -135,9 +133,9 @@ router.get('/me', authMiddleware, getProfile);
  *           schema:
  *             type: object
  *             properties:
- *               refreshToken:
+ *               refreshToken: # 필드 이름 일치
  *                 type: string
- *                 description: "유효한 Refresh 토큰"
+ *                 description: 유효한 Refresh 토큰
  *                 example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
  *     responses:
  *       200:
@@ -149,12 +147,16 @@ router.get('/me', authMiddleware, getProfile);
  *               properties:
  *                 accessToken:
  *                   type: string
+ *                   description: "새로 발급된 Access Token"
  *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *       400:
+ *         description: "Refresh 토큰이 제공되지 않음"
  *       403:
  *         description: "유효하지 않은 Refresh 토큰"
  *       500:
  *         description: "서버 오류"
  */
+
 router.post('/refresh', authMiddleware, refreshToken);
 
 /**
@@ -192,15 +194,15 @@ router.post('/logout', authMiddleware, logout);
  *           schema:
  *             type: object
  *             properties:
- *               currentPassword:
+ *               Password:
  *                 type: string
- *                 example: oldpassword123
+ *                 example: password123
  *               newPassword:
  *                 type: string
  *                 example: newpassword456
  *               name:
  *                 type: string
- *                 example: John Doe
+ *                 example: user@example.com
  *     responses:
  *       200:
  *         description: "사용자 정보 수정 성공"

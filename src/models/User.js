@@ -1,4 +1,3 @@
-//User.js
 const mongoose = require('mongoose');
 
 const UserSchema = new mongoose.Schema({
@@ -11,6 +10,10 @@ const UserSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
+  },
+  refreshToken: { // Refresh Token 필드 추가
+    type: String,
+    default: null,
   },
 });
 

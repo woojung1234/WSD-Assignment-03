@@ -11,10 +11,6 @@ const options = {
     },
     servers: [
       {
-        url: 'http://localhost:443',
-        description: 'Development server',
-      },
-      {
         url: 'http://113.198.66.75:17080',
         description: 'Production server',
       },
@@ -27,27 +23,27 @@ const options = {
             _id: {
               type: 'string',
               description: '공고 ID',
-              example: '64d9f2b2a3c9c2340e123456',
+              example: '674fdc2d4ebaaef2001d7dc6',
             },
             title: {
               type: 'string',
               description: '공고 제목',
-              example: '백엔드 개발자 모집',
+              example: '마켓빌리 JAVA / DBA / TA / AA / PYTHON Recruitment',
             },
             location: {
               type: 'string',
               description: '근무 지역',
-              example: '서울특별시 강남구',
+              example: '서울  강남구',
             },
             salary: {
               type: 'string',
               description: '급여',
-              example: '연봉 5,000만원',
+              example: '평균연봉 상위 10%',
             },
             url: {
               type: 'string',
               description: '공고 URL',
-              example: 'https://www.saramin.co.kr/zf_user/jobs/view/123456',
+              example: 'https://www.saramin.co.kr/zf_user/jobs/relay/view?view_type=search&rec_idx=49463011&location=ts&searchword=python&searchType=search&paid_fl=n&search_uuid=8f0ebf17-0f78-40c4-8646-db021bcc4bf7',
             },
             techStack: {
               type: 'array',
@@ -55,7 +51,7 @@ const options = {
               items: {
                 type: 'string',
               },
-              example: ['Node.js', 'React', 'AWS'],
+              example: ['python', 'java'],
             },
             employmentType: {
               type: 'string',
@@ -66,7 +62,7 @@ const options = {
               type: 'string',
               format: 'date-time',
               description: '마감일',
-              example: '2024-12-31T23:59:59.000Z',
+              example: '2001-12-24T15:00:00.000Z',
             },
             approved: {
               type: 'boolean',
