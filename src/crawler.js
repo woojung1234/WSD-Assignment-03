@@ -7,9 +7,6 @@ const Company = require('./models/Company');
 const JobCategory = require('./models/JobCategory');
 const Recruiter = require('./models/Recruiter');
 const JobStatus = require('./models/JobStatus');
-const User = require('./models/User'); 
-const Application = require('./models/Application'); 
-const Bookmark = require('./models/Bookmark');
 
 
 dotenv.config();
@@ -101,7 +98,7 @@ const techStackKeywords = [
         console.error(`❌ Error fetching page ${page}: ${error.message}`);
       }
   
-      await delay(2000); // 페이지 간 요청 간격
+      await delay(5000); // 페이지 간 요청 간격
     }
   
     return jobs;
@@ -189,7 +186,9 @@ async function saveJobsToDB(jobs) {
                 experience: job.experience,
                 education: job.education,
                 employmentType: job.employmentType,
+                salary: job.salary,
                 deadline: job.deadline,
+                approved: true,
             });
             // 채용 공고 상태 저장 (Open 상태로 기본 설정)
             await saveJobStatus(savedJob._id, 'Open');
@@ -201,51 +200,6 @@ async function saveJobsToDB(jobs) {
     }
 }
 
-// 사용자 추가
-async function addUserToDB(email, password) {
-    try {
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            console.log(`🔄 Skipping existing user: ${email}`);
-            return;
-        }
-
-        await User.create({ email, password });
-        console.log(`✅ New user saved: ${email}`);
-    } catch (error) {
-        console.error(`❌ Error adding user: ${error.message}`);
-    }
-}
-// 지원 내역 추가
-async function addApplicationToDB(userId, jobId, status = 'Pending') {
-    try {
-        const existingApplication = await Application.findOne({ user: userId, job: jobId });
-        if (existingApplication) {
-            console.log(`🔄 Skipping existing application for job: ${jobId}`);
-            return;
-        }
-
-        await Application.create({ user: userId, job: jobId, status });
-        console.log(`✅ Application added for job: ${jobId}`);
-    } catch (error) {
-        console.error(`❌ Error adding application: ${error.message}`);
-    }
-}
-// 북마크 추가
-async function addBookmarkToDB(userId, jobId) {
-    try {
-        const existingBookmark = await Bookmark.findOne({ user: userId, job: jobId });
-        if (existingBookmark) {
-            console.log(`🔄 Skipping existing bookmark for job: ${jobId}`);
-            return;
-        }
-
-        await Bookmark.create({ user: userId, job: jobId });
-        console.log(`✅ Bookmark added for job: ${jobId}`);
-    } catch (error) {
-        console.error(`❌ Error adding bookmark: ${error.message}`);
-    }
-}
 // 실행
 (async () => {
     try {

@@ -39,17 +39,17 @@ const router = express.Router();
  *         name: region
  *         schema:
  *           type: string
- *         description: 지역 필터링
+ *         description: 지역 필터링(ex. 서울  강남구, 서울  강북구)
  *       - in: query
  *         name: experience
  *         schema:
  *           type: string
- *         description: 경력 필터링
+ *         description: 경력 필터링(신입, 1, 3, 5, 10년 이상)
  *       - in: query
  *         name: salary
  *         schema:
  *           type: integer
- *         description: 최소 급여 필터링
+ *         description: 급여 정보 없음
  *       - in: query
  *         name: techStack
  *         schema:
@@ -59,7 +59,7 @@ const router = express.Router();
  *         name: keyword
  *         schema:
  *           type: string
- *         description: 제목 또는 설명 키워드 검색
+ *         description: 제목 또는 설명 키워드 검색 ('(주)' 제외하고 검색)
  *       - in: query
  *         name: companyName
  *         schema:
@@ -69,7 +69,7 @@ const router = express.Router();
  *         name: position
  *         schema:
  *           type: string
- *         description: 포지션 검색
+ *         description: 포지션 검색 (정규직, 계약직)
  *     responses:
  *       200:
  *         description: 공고 목록 조회 성공

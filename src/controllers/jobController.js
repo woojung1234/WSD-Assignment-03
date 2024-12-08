@@ -1,6 +1,6 @@
 const JobPosting = require('../models/JobPosting');
 const { getPagination } = require('../utils/pagination');
-
+const Company = require('../models/Company');
 /**
  * 공고 목록 조회 (필터링, 정렬, 페이지네이션 포함)
  * @param {Object} req - Express 요청 객체
@@ -16,14 +16,26 @@ exports.getJobListings = async (req, res) => {
     salary,
     techStack,
     keyword,
-    companyName,
+    companyName, // 회사명 필터
     position,
   } = req.query;
 
   try {
     const filter = {};
+
     if (region) filter.location = region;
-    if (experience) filter.experience = experience;
+    if (experience) {
+      if (experience === '신입') {
+        filter.experience = '신입'; // 정확히 '신입'인 경우
+      } else {
+        const experienceLevels = ['1년 이상', '3년 이상', '5년 이상', '10년 이상'];
+        const index = experienceLevels.indexOf(experience);
+        if (index !== -1) {
+          filter.experience = { $in: experienceLevels.slice(index) }; // 선택된 조건 이상
+        }
+      }
+    }
+    
     if (salary) filter.salary = { $gte: parseInt(salary, 10) };
     if (techStack) filter.techStack = { $in: techStack.split(',') };
 
@@ -33,15 +45,36 @@ exports.getJobListings = async (req, res) => {
         { description: { $regex: keyword, $options: 'i' } },
       ];
     }
-    if (companyName) filter.company = { $regex: companyName, $options: 'i' };
+
+    // 회사명 필터 추가
+    if (companyName) {
+      const matchingCompanies = await Company.find({ name: { $regex: companyName, $options: 'i' } }).select('_id');
+      const companyIds = matchingCompanies.map((company) => company._id);
+
+      if (companyIds.length > 0) {
+        filter.company = { $in: companyIds };
+      } else {
+        // 검색 결과가 없으면 빈 결과 반환
+        return res.status(200).json({
+          data: [],
+          pagination: {
+            currentPage: parseInt(page, 10),
+            totalPages: 0,
+            totalItems: 0,
+          },
+        });
+      }
+    }
+
     if (position) filter.title = { $regex: position, $options: 'i' };
 
-    const { skip, limit: parsedLimit } = getPagination(page, limit); // 페이지네이션 계산
+    const { skip, limit: parsedLimit } = getPagination(page, limit);
 
     const jobs = await JobPosting.find(filter)
       .sort({ [sort]: 1 })
       .skip(skip)
-      .limit(parsedLimit);
+      .limit(parsedLimit)
+      .populate('company', 'name'); // 회사명을 포함한 결과 반환
 
     const total = await JobPosting.countDocuments(filter);
 

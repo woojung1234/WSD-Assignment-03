@@ -9,7 +9,7 @@ const JobPostingSchema = new mongoose.Schema({
   postedDate: { type: Date },
   url: { type: String, required: true, unique: true },
   employmentType: { type: String },
-  experienceLevel: { type: String },
+  experience: { type: String },
   deadline: { type: Date },
   requirements: { type: String },
   approved: { type: Boolean, default: true }, // 기본값: 승인되지 않음
