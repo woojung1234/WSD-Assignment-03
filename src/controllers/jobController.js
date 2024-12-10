@@ -98,6 +98,9 @@ exports.getJobListings = async (req, res) => {
  */
 exports.getJobDetails = async (req, res) => {
   const { id } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: 'Invalid job ID' });
+  }
 
   try {
     const job = await JobPosting.findById(id);
