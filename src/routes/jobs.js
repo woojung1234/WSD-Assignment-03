@@ -98,6 +98,58 @@ const router = express.Router();
 router.get('/', authMiddleware, getJobListings);
 /**
  * @swagger
+ * /jobs/popular:
+ *   get:
+ *     summary: 인기 공고 조회
+ *     description: 조회수가 높은 공고를 페이지네이션 방식으로 조회합니다.
+ *     tags: [Jobs]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: 페이지 번호
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: 페이지당 항목 수
+ *     responses:
+ *       200:
+ *         description: 인기 공고 조회 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/JobPosting'
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     currentPage:
+ *                       type: integer
+ *                     totalPages:
+ *                       type: integer
+ *                     totalItems:
+ *                       type: integer
+ *       500:
+ *         description: 서버 오류
+ */
+// 인기 공고 조회
+router.get('/popular', authMiddleware, getPopularJobs);
+
+/**
+ * @swagger
  * /jobs/{id}:
  *   get:
  *     summary: 공고 상세 조회
@@ -170,55 +222,4 @@ router.get('/:id', authMiddleware, getJobDetails);
  */
 // 지역별 공고 수 조회
 router.get('/summary/location', authMiddleware, getJobSummaryByLocation);
-/**
- * @swagger
- * /jobs/popular:
- *   get:
- *     summary: 인기 공고 조회
- *     description: 조회수가 높은 공고를 페이지네이션 방식으로 조회합니다.
- *     tags: [Jobs]
- *     security:
- *       - BearerAuth: []
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           default: 1
- *         description: 페이지 번호
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 10
- *         description: 페이지당 항목 수
- *     responses:
- *       200:
- *         description: 인기 공고 조회 성공
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: success
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/JobPosting'
- *                 pagination:
- *                   type: object
- *                   properties:
- *                     currentPage:
- *                       type: integer
- *                     totalPages:
- *                       type: integer
- *                     totalItems:
- *                       type: integer
- *       500:
- *         description: 서버 오류
- */
-// 인기 공고 조회
-router.get('/popular', authMiddleware, getPopularJobs);
 module.exports = router;
