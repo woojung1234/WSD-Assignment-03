@@ -1,8 +1,0 @@
-[2024-12-04T03:06:35.210Z] Error during scraping: Request failed with status code 404
-[2024-12-04T03:11:16.853Z] Page 1 scraped successfully.
-[2024-12-04T03:11:19.886Z] Error scraping page 1: Path "link" is not in schema, strict mode is `true`, and upsert is `true`.
-[2024-12-04T03:11:24.570Z] Page 2 scraped successfully.
-[2024-12-04T03:11:27.578Z] Error scraping page 2: Path "link" is not in schema, strict mode is `true`, and upsert is `true`.
-[2024-12-04T03:11:31.946Z] Page 3 scraped successfully.
-[2024-12-04T03:11:34.971Z] Error scraping page 3: Path "link" is not in schema, strict mode is `true`, and upsert is `true`.
-[2024-12-04T03:11:37.977Z] Crawling completed.
