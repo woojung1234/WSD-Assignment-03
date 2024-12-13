@@ -7,24 +7,44 @@
 
 ## 주요 기능
 ### 1. 회원 관리
-- 회원가입
-- 로그인 및 로그아웃
-- 사용자 정보 조회 및 수정
-- 사용자 계정 삭제
+- **회원가입**: 이메일과 비밀번호를 입력하여 사용자 등록.
+- **로그인 및 로그아웃**: JWT를 이용한 인증 및 로그아웃 기능.
+- **사용자 정보 조회 및 수정**: 사용자 정보를 조회하거나 수정.
+- **사용자 계정 삭제**: 계정을 삭제하여 서비스 이용 중단.
 
 ### 2. 채용 공고 관리
-- 공고 목록 조회 (필터링, 정렬, 페이지네이션)
-- 공고 상세 조회 (관련 공고 추천 포함)
-- 공고 지역별 통계 조회
-- 인기 공고 조회
+- **공고 목록 조회**: 필터링, 정렬, 페이지네이션 기능 지원.
+- **공고 상세 조회**: 공고에 대한 상세 정보와 관련 공고 추천 제공.
+- **공고 지역별 통계 조회**: 지역별 공고 수 통계.
+- **인기 공고 조회**: 조회수가 높은 공고 목록 제공.
 
-### 3. 지원서 관리
-- 지원서 작성 (텍스트 기반)
-- 지원서 목록 조회
-- 지원서 삭제
+### 3. 지원 관리
+- **지원하기**: 사용자가 공고에 지원 가능.
+- **지원 내역 조회**: 사용자가 지원한 공고 확인 가능.
+- **지원 취소**: 신청한 공고 취소 가능.
 
-### 4. API 문서화
-- Swagger를 통해 API 사용법 및 테스트 환경 제공
+### 4. 북마크 관리
+- **북마크 추가/삭제**: 관심 있는 공고를 북마크.
+- **북마크 목록 조회**: 저장된 북마크 목록 확인.
+
+### 5. 공고 비교
+- **공고 비교 기능**: 두 개 이상의 공고를 비교하여 상세 정보를 제공.
+
+### 6. 리뷰 관리
+- **리뷰 작성**: 공고에 대한 리뷰 작성.
+- **리뷰 목록 조회**: 작성된 리뷰를 확인 가능.
+- **리뷰 삭제**: 작성한 리뷰를 삭제 가능.
+
+### 7. 지원 관리 (/resumes)
+- **지원서 작성**: 사용자가 본인을 알리는 지원서를 작성 가능.
+- **지원서 목록 조회**: 작성한 지원서를 확인 가능.
+- **지원서 삭제**: 작성한 지원서를 삭제 가능.
+
+### 8. 관리자 기능
+- **공고 승인**: 관리자가 공고를 승인하거나 거절 가능.
+
+### 9. API 문서화
+- **Swagger를 통한 문서화**: API 사용법과 테스트 환경 제공.
 
 ---
 
@@ -43,7 +63,7 @@ WSD-Assignment-03/
 │   ├── config/
 │   │   ├── db.js              # 데이터베이스 연결 설정
 │   │   └── swagger.js         # Swagger 설정
-│   ├── controllers/
+│   ├── controllers/ # 요청에 대한 비즈니스 로직 처리
 │   │   ├── adminController.js  # 공고 승인 관련 컨트롤러
 │   │   ├── authController.js  # 인증 관련 컨트롤러
 │   │   ├── applcationController.js  # 지원 관련 컨트롤러
@@ -55,7 +75,7 @@ WSD-Assignment-03/
 │   ├── middlewares/
 │   │   ├── authMiddleware.js  # 인증 미들웨어
 │   │   └── responseMiddleware.js # 통일된 응답 처리
-│   ├── models/
+│   ├── models/ # 데이터베이스 스키마 정의
 │   │   ├── Application.js            # 지원 모델
 │   │   ├── Bookmark.js            # 관심공고 모델
 │   │   ├── Company.js      # 회사 정보 모델
@@ -67,7 +87,7 @@ WSD-Assignment-03/
 │   │   ├── Resume.js          # 지원서 모델
 │   │   ├── Review.js          # 리뷰 모델
 │   │   └── User.js          # 사용자 모델
-│   ├── routes/
+│   ├── routes/ # API 엔드포인트 정의
 │   │   ├── admin.js            # 관리자 관련 라우트
 │   │   ├── applications.js            # 지원 관련 라우트
 │   │   ├── auth.js            # 인증 관련 라우트
@@ -85,19 +105,27 @@ WSD-Assignment-03/
 패키지 설치
 npm install
 
+npm 실행이 안된다면?
+- Get-ExecutionPolicy 명령어 입력 후 Restricted로 설정되어 있다면, Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+ 명령어 입력 후 npm install
+
+
 ## .env파일 제작
 
 PORT=443
-DB_URI=mongodb://kwj:1234@localhost:3000/job_platform
-JWT_SECRET=057b12507a0321c7fa167d3c35f6083dc6247cdd948451994fd927894a96c9c8d2d8696fa7b461e8a62c979b1c57669ac7b958d18ffaf1e7bc4e8c968785b1ff
-JWT_REFRESH_SECRET=38cff1a217195c44de5e77886e7e1a581539b91ed1ba8dd880e9b349a5c45a475f20a865ee789482de2881c9d87d660df940f08d66266607405777e4efd6dfd2
+DB_URI=mongodb://username:password@host:port/database
+JWT_SECRET=your_jwt_secret
+JWT_REFRESH_SECRET=your_refresh_secret
 TOKEN_EXPIRY=1h
 REFRESH_TOKEN_EXPIRY=7d
 
 ## 서버 실행
-npm start
+npm start (필요 시 sudo npm start)
 
 ## Swagger 사용
-- 기본적으로 서버를 실행하고, MongoDB에 연결된 상태에서, 크롤링 데이터와 함께 작업이 가능합니다.
+- 서버는 배포된 상태입니다. http://113.198.66.75:17080/api-docs 에서 Swagger를 실행할 수 있습니다.
 - 데이터베이스 설정이 완료되면, 지원서 및 리뷰와 같은 기본 기능을 테스트할 수 있습니다.
 - job_id 등 id 관련된 것들은 회원가입 후 로그인 해서 얻은 access_token으로 인증 후 실제 id를 해당 입력 칸에 입력하세요.
+- **JWT 인증**:
+  - API 사용 시, 회원가입 후 로그인하여 받은 `access_token`을 Authorization 헤더에 포함해야 합니다.
+  - 예: `Authorization: Bearer your_access_token`
